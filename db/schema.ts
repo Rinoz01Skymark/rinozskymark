@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, pgTable, serial, text, timestamp, varchar } from "drizzle-orm/pg-core";
 
 // Users/Accounts table
 export const users = pgTable("users", {
@@ -8,12 +8,11 @@ export const users = pgTable("users", {
   phone: varchar("phone", { length: 20 }).default(""),
   company: varchar("company", { length: 255 }).default(""),
   role: varchar("role", { length: 50 }).notNull().default("customer"), // "customer" or "admin"
-  password: varchar("password", { length: 255 }).default(""), // Hashed password or empty if using Netlify Identity
   netlifyIdentityId: varchar("netlify_identity_id", { length: 255 }).default(""),
   status: varchar("status", { length: 50 }).notNull().default("active"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [index("users_identity_id_idx").on(table.netlifyIdentityId)]);
 
 // Services catalog - expanded with all 7 categories
 export const services = pgTable("services", {
@@ -21,6 +20,7 @@ export const services = pgTable("services", {
   title: varchar("title", { length: 255 }).notNull(),
   category: varchar("category", { length: 100 }).notNull(), // Digital Services, Business & Documentation, Government & Online Application Assistance, Career & Professional Services, Architecture & 3D Design, Education & Student Support, Other Digital Support
   slug: varchar("slug", { length: 255 }).notNull().unique(),
+  description: text("description"),
   shortDescription: text("short_description").notNull(),
   fullDescription: text("full_description").notNull(),
   features: text("features").array().notNull().default([]),
@@ -48,13 +48,17 @@ export const serviceRequests = pgTable("service_requests", {
   description: text("description").notNull(),
   preferredDate: varchar("preferred_date", { length: 50 }).default(""),
   documentNames: text("document_names").array().default([]), // Names of uploaded documents
+  documentKeys: text("document_keys").array().default([]),
   status: varchar("status", { length: 50 }).notNull().default("Pending"), // Pending, Received, In Progress, Awaiting Customer, Completed, Cancelled
   budget: varchar("budget", { length: 100 }).default(""),
   notes: text("notes").default(""),
   adminNotes: text("admin_notes").default(""),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  index("service_requests_user_id_idx").on(table.userId),
+  index("service_requests_status_idx").on(table.status),
+]);
 
 // Customer Account Profile
 export const customerProfiles = pgTable("customer_profiles", {
@@ -66,7 +70,7 @@ export const customerProfiles = pgTable("customer_profiles", {
   businessType: varchar("business_type", { length: 100 }).default(""), // Individual, Startup, SME, Enterprise
   location: varchar("location", { length: 255 }).default(""),
   bio: text("bio").default(""),
-  profileComplete: boolean().notNull().default(false),
+  profileComplete: boolean("profile_complete").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

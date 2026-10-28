@@ -1,0 +1,5 @@
+node_modules/
+.netlify/*
+!.netlify/features/
+!.netlify/features/**
+!.netlify/results.md
