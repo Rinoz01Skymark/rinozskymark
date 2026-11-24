@@ -21,8 +21,9 @@ export const services = pgTable("services", {
   title: varchar("title", { length: 255 }).notNull(),
   category: varchar("category", { length: 100 }).notNull(), // Digital Services, Business & Documentation, Government & Online Application Assistance, Career & Professional Services, Architecture & 3D Design, Education & Student Support, Other Digital Support
   slug: varchar("slug", { length: 255 }).notNull().unique(),
-  shortDescription: text("short_description").notNull(),
-  fullDescription: text("full_description").notNull(),
+  shortDescription: text("short_description").notNull().default(""),
+  fullDescription: text("full_description").notNull().default(""),
+  description: text("description").notNull().default(""), // Legacy column, kept for compatibility
   features: text("features").array().notNull().default([]),
   benefits: text("benefits").array().notNull().default([]),
   suitableCustomer: text("suitable_customer").notNull().default(""),
